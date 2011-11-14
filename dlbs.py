@@ -3,8 +3,11 @@
 import contextlib
 from lxml import etree
 import json
-import urllib
 import sys
+try:
+	import urllib3 as urllib
+except ImportError:
+	import urllib
 
 OPTIONS = {
 	'1': {
@@ -28,7 +31,7 @@ OPTIONS = {
 		'weight': 1,
 	}
 }
-FILENAME = 'db-result.json'
+FILENAME = 'bs-result.json'
 
 def analyze(url):
 	with contextlib.closing(urllib.urlopen(url)) as urlf:
@@ -43,9 +46,15 @@ def analyze(url):
 	voteCount = sum(votes.values())
 	decision = sum(OPTIONS[o]['weight'] * votes for o,votes in votes.items())
 	nextUrl = 'http://besser-studieren.nrw.de' + doc.find('.//a[@class="navigate_next"]').attrib['href']
-	author = doc.find('.//div[@class="username"]').text
+	authorNode = doc.find('.//div[@class="username"]')
+	aNode = authorNode.find('./a')
+	if aNode is not None:
+		author = aNode.text
+	else:
+		author = authorNode.text
 	if author.startswith('verfasst von: '):
 		author = author[len('verfasst von: '):]
+	author = author.strip()
 
 	return {
 		'author': author,
