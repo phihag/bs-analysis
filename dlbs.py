@@ -47,8 +47,6 @@ def analyze(url):
 		'url': url,
 		'title': title,
 		'votes': votes,
-		'voteCount': voteCount,
-		'decision': decision,
 		'nextUrl': nextUrl,
 	}
 
