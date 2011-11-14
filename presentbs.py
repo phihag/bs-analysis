@@ -16,6 +16,7 @@ _HTML_HEADER = '''<!DOCTYPE html>
 	<title>Ergebnisse von besser-studieren.nrw.de</title>
 <style type="text/css">
 .voteCount {padding-left: 2.5em;}
+.num {white-space: pre;}
 </style>
 </head>
 <body>
@@ -90,6 +91,7 @@ def main():
 
 		mean = decision / voteCount
 		td = etree.Element('td')
+		td.attrib['class'] = 'num'
 		td.text = '%.2f' % mean
 		tr.append(td)
 
@@ -103,7 +105,8 @@ def main():
 	p = etree.Element('p')
 	total.append(p)
 	voteCount = sum(sum(r['votes'].values()) for r in res.values())
-	p.text = 'Anzahl Stimmen: ' + str(voteCount)
+	voteCountsFor = [sum(r['votes'][o] for r in res.values()) for o in sorted(OPTIONS)]
+	p.text = 'Anzahl Stimmen: ' + str(voteCount) + ' (' + '/'.join(map(str, voteCountsFor)) + ')'
 
 	p = etree.Element('p')
 	total.append(p)
