@@ -13,6 +13,9 @@ _HTML_HEADER = '''<!DOCTYPE html>
 <head>
 	<meta charset="utf-8" />
 	<title>Ergebnisse von besser-studieren.nrw.de</title>
+<style type="text/css">
+.voteCount {padding-left: 2.5em;}
+</style>
 </head>
 <body>
 <h1>Ergebnisse von besser-studieren.nrw.de</h1>
@@ -21,13 +24,24 @@ _HTML_HEADER = '''<!DOCTYPE html>
 _HTML_FOOTER = '''</body>
 </html>'''
 
+def _meanDisagree(votes):
+	votes = list(votes)
+	return (sum(
+		(
+			abs(sum(OPTIONS[o]['weight'] * voteCount for o,voteCount in v.items()))
+		/
+			sum(v.values())
+		)
+		
+		for v in votes)
+	/ len(votes))
 
 
 def main():
 	res = json.load(sys.stdin)
 
 	table = etree.Element('table')
-	thead = etree.fromstring('<thead><tr><th>Titel</th></tr></thead>')
+	thead = etree.fromstring('<thead><tr><th>Titel</th><th>Autor</th></tr></thead>')
 	tr = thead.find('.//tr')
 	table.append(thead)
 	for o,od in sorted(OPTIONS.items()):
@@ -40,7 +54,7 @@ def main():
 	tbody = etree.Element('tbody')
 	table.append(tbody)
 
-	for url,r in res.items():
+	for url,r in sorted(res.items()):
 		tr = etree.Element('tr')
 		tbody.append(tr)
 
@@ -51,6 +65,10 @@ def main():
 		td.append(a)
 		tr.append(td)
 
+		td = etree.Element('td')
+		td.text = r['author']
+		tr.append(td)
+
 		votes = r['votes']
 		for o in sorted(OPTIONS):
 			td = etree.Element('td')
@@ -59,6 +77,7 @@ def main():
 
 		voteCount = sum(votes.values())
 		td = etree.Element('td')
+		td.attrib['class'] = 'voteCount'
 		td.text = str(voteCount)
 		tr.append(td)
 
@@ -73,10 +92,23 @@ def main():
 		tr.append(td)
 
 	total = etree.Element('div')
-	votesTotal = etree.Element('p')
-	total.append(votesTotal)
+
+	p = etree.Element('p')
+	total.append(p)
+	num = len(res)
+	p.text = 'Anzahl Thesen: ' + str(num)
+
+	p = etree.Element('p')
+	total.append(p)
 	voteCount = sum(sum(r['votes'].values()) for r in res.values())
-	total.text = 'Anzahl Stimmen: ' + str(voteCount)
+	p.text = 'Anzahl Stimmen: ' + str(voteCount)
+
+	p = etree.Element('p')
+	total.append(p)
+	meanDisagree = _meanDisagree(r['votes'] for r in res.values())
+	meanDisagreeImportant = _meanDisagree(r['votes'] for r in res.values() if sum(r['votes'].values()) > 20)
+	p.text = 'Durchschnittliche Diskussionsweite: %.2f (> 20 Stimmen: %.2f)' % (meanDisagree, meanDisagreeImportant)
+
 
 	print(_HTML_HEADER)
 	print(etree.tostring(table, pretty_print=True))
