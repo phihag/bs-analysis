@@ -42,8 +42,12 @@ def analyze(url):
 	voteCount = sum(votes.values())
 	decision = sum(OPTIONS[o]['weight'] * votes for o,votes in votes.items())
 	nextUrl = 'http://besser-studieren.nrw.de' + doc.find('.//a[@class="navigate_next"]').attrib['href']
-	
+	author = doc.find('.//div[@class="username"]').text
+	if author.startswith('verfasst von: '):
+		author = author[len('verfasst von: '):]
+
 	return {
+		'author': author,
 		'url': url,
 		'title': title,
 		'votes': votes,
@@ -54,12 +58,17 @@ def main():
 	urls = {}
 
 	url = 'http://besser-studieren.nrw.de/node/676/0'
-	while url not in urls:
+	while True:
 		r = analyze(url)
+		url = r['url']
+		if url in urls:
+			break
 		urls[url] = r
+		print(url)
 		url = r['nextUrl']
 
-	json.dump(urls, sys.stdout)
+	with open('bs-result.json', 'wb') as jsonf:
+		json.dump(urls, jsonf)
 
 if __name__ == '__main__':
 	main()
