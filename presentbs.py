@@ -7,6 +7,7 @@ from lxml import etree
 
 import dlbs
 OPTIONS = dlbs.OPTIONS
+FILENAME = dlbs.FILENAME
 
 _HTML_HEADER = '''<!DOCTYPE html>
 <html>
@@ -38,7 +39,8 @@ def _meanDisagree(votes):
 
 
 def main():
-	res = json.load(sys.stdin)
+	with open(FILENAME, 'rb') as jsonf:
+		res = json.load(jsonf)
 
 	table = etree.Element('table')
 	thead = etree.fromstring('<thead><tr><th>Titel</th><th>Autor</th></tr></thead>')

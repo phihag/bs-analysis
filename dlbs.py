@@ -28,6 +28,7 @@ OPTIONS = {
 		'weight': 1,
 	}
 }
+FILENAME = 'db-result.json'
 
 def analyze(url):
 	with contextlib.closing(urllib.urlopen(url)) as urlf:
@@ -67,7 +68,7 @@ def main():
 		print(url)
 		url = r['nextUrl']
 
-	with open('bs-result.json', 'wb') as jsonf:
+	with open(FILENAME, 'wb') as jsonf:
 		json.dump(urls, jsonf)
 
 if __name__ == '__main__':
