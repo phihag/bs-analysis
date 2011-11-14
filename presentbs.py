@@ -15,9 +15,10 @@ _HTML_HEADER = '''<!DOCTYPE html>
 	<meta charset="utf-8" />
 	<title>Ergebnisse von besser-studieren.nrw.de</title>
 <style type="text/css">
-.voteCount {padding-left: 2.5em;}
 .num {white-space: pre;}
 </style>
+<script src="jquery-1.7.min.js"></script>
+<script src="bs.js"></script>
 </head>
 <body>
 <h1>Ergebnisse von besser-studieren.nrw.de</h1>
@@ -47,10 +48,10 @@ def main():
 	thead = etree.fromstring('<thead><tr><th>Titel</th><th>Autor</th></tr></thead>')
 	tr = thead.find('.//tr')
 	table.append(thead)
-	for o,od in sorted(OPTIONS.items()):
-		th = etree.Element('th')
-		th.text = od['string']
-		tr.append(th)
+	#for o,od in sorted(OPTIONS.items()):
+	#	th = etree.Element('th')
+	#	th.text = od['string']
+	#	tr.append(th)
 	tr.append(etree.fromstring('<th>Stimmen</th>'))
 	tr.append(etree.fromstring('<th>Ergebnis</th>'))
 	tr.append(etree.fromstring('<th>⌀</th>'))
@@ -74,9 +75,10 @@ def main():
 
 		votes = r['votes']
 		for o in sorted(OPTIONS):
-			td = etree.Element('td')
-			td.text = str(votes[o])
-			tr.append(td)
+		#	td = etree.Element('td')
+		#	td.text = str(votes[o])
+			tr.attrib['data-votes-' + o] = str(votes[o])
+		#	tr.append(td)
 
 		voteCount = sum(votes.values())
 		td = etree.Element('td')
